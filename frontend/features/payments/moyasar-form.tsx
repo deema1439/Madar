@@ -38,6 +38,12 @@ export function MoyasarForm({ checkout }: { checkout: Checkout }) {
   const [failed, setFailed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const key = process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY;
+  console.log("Moyasar configuration:", {
+    exists: Boolean(key),
+    validPrefix: key?.startsWith("pk_"),
+    length: key?.length ?? 0,
+  });
+
   useEffect(() => {
     if (!loaded || !root.current || !key?.startsWith("pk_")) return;
     const element = root.current;
@@ -55,7 +61,7 @@ export function MoyasarForm({ checkout }: { checkout: Checkout }) {
           currency: checkout.currency,
           description: `MADAR ${checkout.serviceType}`,
           publishable_api_key: key,
-          callback_url: `${window.location.origin}/${locale}/payments/return`,
+          callback_url: `${window.location.origin}/${locale}/payments?payment_return=1`,
           methods: ["creditcard"],
           given_id: checkout.givenId,
           metadata: checkout.metadata,

@@ -5,6 +5,22 @@ import { BACKEND_PROXY_PREFIX } from "./config";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
+const DEFAULT_TIMEOUT_MS = 60_000;
+const LONG_REQUEST_TIMEOUT_MS = 180_000;
+
+function getRequestTimeout(path: string): number {
+  const longRunningPaths = [
+    /^\/api\/v1\/recommendations\/me\/smart(?:\?|$)/,
+    /^\/api\/v1\/recommendations\/me\/selected-neighborhood\/smart(?:\?|$)/,
+    /^\/api\/v1\/ai\//,
+  ];
+
+  return longRunningPaths.some((pattern) => pattern.test(path))
+      ? LONG_REQUEST_TIMEOUT_MS
+      : DEFAULT_TIMEOUT_MS;
+}
+
+
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
@@ -12,7 +28,7 @@ export async function apiRequest<T>(
   const controller = new AbortController();
   const timeout = setTimeout(
     () => controller.abort(new DOMException("Request timed out", "TimeoutError")),
-    60_000,
+      getRequestTimeout(path),
   );
   const signal = options.signal
     ? AbortSignal.any([controller.signal, options.signal])

@@ -140,8 +140,7 @@ export function CompareSearchDialog({
                 aria-modal="true"
                 aria-label={ar ? "مقارنة العقارات" : "Compare properties"}
                 dir={ar ? "rtl" : "ltr"}
-                className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[26px] border border-border bg-background shadow-2xl"
-            >
+                className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-border/70 bg-background shadow-2xl"            >
                 <header className="flex items-start justify-between gap-4 border-b border-border/60 px-5 py-5 sm:px-7">
                     <div>
                         <div className="mb-2 flex items-center gap-2 text-primary">
@@ -328,88 +327,246 @@ export function CompareSearchDialog({
                         </div>
                     )}
 
+
                     {comparison.data && (
-                        <div className="space-y-5">
-                            <h3 className="text-lg font-semibold">
-                                {ar ? "نتيجة المقارنة" : "Comparison result"}
-                            </h3>
+                        <div className="space-y-6">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p className="mb-1 text-xs font-medium text-primary">
+                                        {ar ? "تحليل مدار الذكي" : "Madar smart analysis"}
+                                    </p>
+                                    <h3 className="text-xl font-semibold">
+                                        {ar ? "نتيجة مقارنة العقارين" : "Property comparison results"}
+                                    </h3>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {ar
+                                            ? "نظرة واضحة تساعدك على اختيار البيت الأنسب."
+                                            : "A clearer view to help you choose the right home."}
+                                    </p>
+                                </div>
+                            </div>
 
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                {comparison.data.properties.map((property) => (
-                                    <div
-                                        key={`${property.source}:${property.externalPropertyId}`}
-                                        className="space-y-3 rounded-2xl border border-border/70 bg-card p-4"
-                                    >
-                                        <h4 className="font-semibold">
-                                            {property.title || "—"}
-                                        </h4>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {comparison.data.properties.map((property, index) => {
+                                    const recommended =
+                                        comparison.data?.aiAnalysis?.recommendedExternalPropertyId ===
+                                        property.externalPropertyId;
 
-                                        {[
-                                            [ar ? "السعر" : "Price", property.price],
-                                            [ar ? "المساحة" : "Area", property.areaSqm],
-                                            [ar ? "غرف النوم" : "Bedrooms", property.bedrooms],
-                                            [ar ? "درجة المطابقة" : "Match score", property.matchScore],
-                                            [ar ? "ملاءمة السكن" : "Housing score", property.housingScore],
-                                            [ar ? "التنقل" : "Commute score", property.commuteScore],
-                                            [ar ? "الخدمات" : "Services score", property.servicesScore],
-                                        ].map(([label, value]) => (
-                                            <div
-                                                key={String(label)}
-                                                className="flex justify-between gap-3 border-b border-border/40 pb-2 text-sm"
-                                            >
-                                                <span className="text-muted-foreground">{label}</span>
-                                                <span className="font-medium">
-                          {typeof value === "number" ? money(value) : "—"}
-                        </span>
+                                    const metrics = [
+                                        {
+                                            label: ar ? "درجة المطابقة" : "Match score",
+                                            value: property.matchScore,
+                                        },
+                                        {
+                                            label: ar ? "ملاءمة السكن" : "Housing suitability",
+                                            value: property.housingScore,
+                                        },
+                                        {
+                                            label: ar ? "التنقل" : "Commute",
+                                            value: property.commuteScore,
+                                        },
+                                        {
+                                            label: ar ? "الخدمات" : "Services",
+                                            value: property.servicesScore,
+                                        },
+                                    ];
+
+                                    return (
+                                        <div
+                                            key={`${property.source}:${property.externalPropertyId}`}
+                                            className={`min-w-0 overflow-hidden rounded-[24px] border bg-card ${
+                                                recommended
+                                                    ? "border-primary/50 shadow-sm"
+                                                    : "border-border/70"
+                                            }`}
+                                        >
+                                            <div className="border-b border-border/60 p-5">
+                                                <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
+                  {ar ? `العقار ${index + 1}` : `Property ${index + 1}`}
+                </span>
+                                                    {recommended && (
+                                                        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    {ar ? "اختيار مدار" : "Madar's pick"}
+                  </span>
+                                                    )}
+                                                </div>
+
+                                                <h4
+                                                    dir="auto"
+                                                    className="line-clamp-2 min-h-12 text-base font-semibold leading-6"
+                                                >
+                                                    {property.title || (ar ? "عقار سكني" : "Residential property")}
+                                                </h4>
+
+                                                <p className="mt-3 text-2xl font-semibold tabular-nums">
+                                                    {property.price == null ? "—" : money(property.price)}
+                                                    {property.price != null && (
+                                                        <span className="ms-2 text-sm font-normal text-muted-foreground">
+                    {ar ? "ر.س" : "SAR"}
+                  </span>
+                                                    )}
+                                                </p>
+
+                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                    {property.areaSqm != null && (
+                                                        <span className="rounded-lg bg-secondary/70 px-3 py-2 text-xs">
+                    {money(property.areaSqm)} {ar ? "م²" : "m²"}
+                  </span>
+                                                    )}
+                                                    {property.bedrooms != null && (
+                                                        <span className="rounded-lg bg-secondary/70 px-3 py-2 text-xs">
+                    {money(property.bedrooms)}{" "}
+                                                            {ar ? "غرف نوم" : "Bedrooms"}
+                  </span>
+                                                    )}
+                                                    {property.neighborhood && (
+                                                        <span className="rounded-lg bg-secondary/70 px-3 py-2 text-xs">
+                    {property.neighborhood}
+                  </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                ))}
+
+                                            <div className="space-y-5 p-5">
+                                                {metrics.map((metric) => (
+                                                    <div key={metric.label} className="space-y-2">
+                                                        <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-muted-foreground">
+                      {metric.label}
+                    </span>
+                                                            <span className="font-semibold tabular-nums">
+                      {metric.value == null
+                          ? "—"
+                          : `${new Intl.NumberFormat(locale, {
+                              maximumFractionDigits: 1,
+                          }).format(metric.value)}%`}
+                    </span>
+                                                        </div>
+
+                                                        <div
+                                                            className="h-2 overflow-hidden rounded-full bg-secondary"
+                                                            role="progressbar"
+                                                            aria-label={metric.label}
+                                                            aria-valuemin={0}
+                                                            aria-valuemax={100}
+                                                            aria-valuenow={
+                                                                metric.value == null
+                                                                    ? undefined
+                                                                    : Math.max(0, Math.min(100, metric.value))
+                                                            }
+                                                        >
+                                                            <div
+                                                                className={`h-full rounded-full transition-all ${
+                                                                    metric.value == null
+                                                                        ? "bg-transparent"
+                                                                        : "bg-primary"
+                                                                }`}
+                                                                style={{
+                                                                    width: `${
+                                                                        metric.value == null
+                                                                            ? 0
+                                                                            : Math.max(0, Math.min(100, metric.value))
+                                                                    }%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {comparison.data.aiAnalysis && (
-                                <div className="space-y-3 rounded-2xl bg-secondary/30 p-5">
-                                    <h4 className="font-semibold">
-                                        {ar ? "رأي مساعد مدار الذكي" : "Madar AI analysis"}
-                                    </h4>
-
-                                    {comparison.data.aiAnalysis.recommendedPropertyTitle && (
-                                        <p className="text-sm font-medium">
-                                            {ar ? "العقار الأنسب:" : "Recommended property:"}{" "}
-                                            {comparison.data.aiAnalysis.recommendedPropertyTitle}
-                                        </p>
-                                    )}
-
-                                    {comparison.data.aiAnalysis.reason && (
-                                        <p className="whitespace-pre-line text-sm leading-7">
-                                            {comparison.data.aiAnalysis.reason}
-                                        </p>
-                                    )}
-
-                                    {comparison.data.aiAnalysis.alternativeReason && (
-                                        <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground">
-                                            {comparison.data.aiAnalysis.alternativeReason}
-                                        </p>
-                                    )}
-
-                                    {comparison.data.aiAnalysis.tradeOff && (
-                                        <div className="border-t border-border/60 pt-3">
-                                            <p className="mb-1 text-sm font-semibold">
-                                                {ar ? "نقاط تستحق الانتباه" : "Trade-offs"}
-                                            </p>
-                                            <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground">
-                                                {comparison.data.aiAnalysis.tradeOff}
-                                            </p>
+                                <section className="overflow-hidden rounded-[24px] border border-border/70 bg-card">
+                                    <div className="border-b border-border/60 bg-secondary/25 px-5 py-5 sm:px-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                                <span className="text-lg">✦</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-medium text-primary">
+                                                    MADAR AI
+                                                </p>
+                                                <h4 className="text-lg font-semibold">
+                                                    {ar ? "رأي مساعد مدار الذكي" : "Madar AI recommendation"}
+                                                </h4>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+
+                                    <div className="space-y-5 p-5 sm:p-6">
+                                        {comparison.data.aiAnalysis.recommendedPropertyTitle && (
+                                            <div className="space-y-2">
+                                                <p className="text-xs font-medium text-muted-foreground">
+                                                    {ar ? "العقار الذي يرشحه مدار" : "Madar recommends"}
+                                                </p>
+                                                <p
+                                                    dir={ar ? "rtl" : "ltr"}
+                                                    className="max-w-3xl break-words text-start text-base font-semibold leading-7 text-primary"
+                                                >
+                                                    <bdi dir="auto">
+                                                        {comparison.data.aiAnalysis.recommendedPropertyTitle}
+                                                    </bdi>
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {comparison.data.aiAnalysis.reason && (
+                                            <div className="space-y-2">
+                                                <h5 className="text-sm font-semibold">
+                                                    {ar ? "لماذا هذا الاختيار؟" : "Why this property?"}
+                                                </h5>
+                                                <p
+                                                    dir={ar ? "rtl" : "ltr"}
+                                                    className="max-w-3xl whitespace-pre-line break-words text-start text-sm leading-8"
+                                                >
+                                                    {comparison.data.aiAnalysis.reason}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {comparison.data.aiAnalysis.alternativeReason && (
+                                            <div className="space-y-2 border-t border-border/60 pt-5">
+                                                <h5 className="text-sm font-semibold">
+                                                    {ar ? "وماذا عن العقار الآخر؟" : "What about the alternative?"}
+                                                </h5>
+                                                <p
+                                                    dir={ar ? "rtl" : "ltr"}
+                                                    className="max-w-3xl whitespace-pre-line break-words text-start text-sm leading-8 text-muted-foreground"
+                                                >
+                                                    {comparison.data.aiAnalysis.alternativeReason}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {comparison.data.aiAnalysis.tradeOff && (
+                                            <div className="space-y-2 rounded-2xl border border-border/60 bg-secondary/20 p-4">
+                                                <h5 className="text-sm font-semibold">
+                                                    {ar ? "نقاط تستحق الانتباه" : "Things to consider"}
+                                                </h5>
+                                                <p
+                                                    dir={ar ? "rtl" : "ltr"}
+                                                    className="max-w-3xl whitespace-pre-line break-words text-start text-sm leading-7 text-muted-foreground"
+                                                >
+                                                    {comparison.data.aiAnalysis.tradeOff}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
                             )}
 
-                            <Button variant="outline" onClick={close}>
-                                {ar ? "إغلاق المقارنة" : "Close comparison"}
-                            </Button>
+                            <div className="flex justify-end border-t border-border/60 pt-4">
+                                <Button variant="outline" onClick={close}>
+                                    {ar ? "إغلاق المقارنة" : "Close comparison"}
+                                </Button>
+                            </div>
                         </div>
                     )}
+
                 </div>
             </section>
         </div>

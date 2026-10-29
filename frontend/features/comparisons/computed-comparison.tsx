@@ -131,11 +131,24 @@ export function ComputedComparisonPanel({ properties }: { properties: SavedPrope
   });
   const cost = prices.data?.AI_COMPARISON;
   const mutation = useMutation({
-    mutationFn: () =>
-      insights.compareMultiple(
-        properties.map((property) => property.id!),
-        apiLanguage(locale),
-      ),
+    mutationFn: () => {
+      if (properties.length === 2) {
+        const [first, second] = properties;
+
+        return insights.compareTwo(
+            first.source,
+            first.externalPropertyId,
+            second.source,
+            second.externalPropertyId,
+            apiLanguage(locale),
+        );
+      }
+
+      return insights.compareMultiple(
+          properties.map((property) => property.id!),
+          apiLanguage(locale),
+      );
+    },
     retry: 0,
     onMutate: () => setResult(undefined),
     onSuccess: (data) => {

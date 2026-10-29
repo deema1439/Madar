@@ -747,28 +747,29 @@ public class PaymentService {
         return definition;
     }
 
-
     private void validateCheckoutConfiguration() {
         try {
             URI callback = URI.create(callbackUrl);
 
-            if (!"https".equalsIgnoreCase(callback.getScheme())
+            boolean isHttps =
+                    "https".equalsIgnoreCase(callback.getScheme());
+
+            boolean isLocalHttp =
+                    "http".equalsIgnoreCase(callback.getScheme())
+                            && ("localhost".equalsIgnoreCase(callback.getHost())
+                            || "127.0.0.1".equals(callback.getHost()));
+
+            if ((!isHttps && !isLocalHttp)
                     || callback.getHost() == null
                     || callback.getUserInfo() != null) {
+
                 throw new IllegalArgumentException();
             }
 
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
-                    "Configure an HTTPS Moyasar callback URL"
-            );
-        }
-
-        if (webhookSecret == null || webhookSecret.isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Configure Moyasar webhook authenticity first"
+                    "Configure a valid Moyasar callback URL"
             );
         }
     }

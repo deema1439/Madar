@@ -25,7 +25,6 @@ import { discovery } from "@/lib/api/discovery";
 import { apiLanguage } from "@/lib/api/config";
 import type { Property } from "@/lib/api/discovery-contracts";
 import type { PropertyComparison, SavedProperty } from "@/lib/api/contracts";
-import { ComputedComparisonPanel } from "./computed-comparison";
 import { ComparisonLocationAnalysis } from "./comparison-location-analysis";
 
 type Ref = { source: string; id: string; saved?: SavedProperty };
@@ -648,11 +647,7 @@ export function ComparisonWorkspace({
                 property: listing(index) ?? item.property,
               }))}
           />
-          <ComputedComparisonPanel
-            properties={[firstSaved, secondSaved].filter(
-              (item): item is SavedProperty => !!item,
-            )}
-          />
+
         </>
       )}
     </div>

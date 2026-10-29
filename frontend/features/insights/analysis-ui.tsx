@@ -41,7 +41,7 @@ export function ScoreFacts({
                 ? ar
                   ? "غير متاح"
                   : "Unavailable"
-                : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value)} / 100`}
+                  : new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value)}
             </dd>
           </div>
         ))}

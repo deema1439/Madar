@@ -15,6 +15,19 @@ export type BackendResponse = {
   status: number;
 };
 
+
+function getBackendTimeout(path: string): number {
+  if (
+      path.startsWith("/api/v1/ai/") ||
+      path.split("?")[0] === "/api/v1/recommendations/me/smart"
+  ) {
+    return 180_000;
+  }
+
+  return 60_000;
+}
+
+
 export async function publicBackendResponse(
   path: string,
   options: BackendOptions = {},
@@ -53,8 +66,8 @@ export async function publicBackendResponse(
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: options.signal
-        ? AbortSignal.any([options.signal, AbortSignal.timeout(60_000)])
-        : AbortSignal.timeout(60_000),
+        ? AbortSignal.any([options.signal, AbortSignal.timeout(getBackendTimeout(path))])
+        : AbortSignal.timeout(getBackendTimeout(path)),
     });
   } catch (error) {
     diagnostic("backend-transport-failed", {
