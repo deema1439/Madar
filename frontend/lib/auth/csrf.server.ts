@@ -7,15 +7,25 @@ const production = process.env.NODE_ENV === "production";
 const name = production ? "__Host-madar-csrf" : "madar-csrf";
 export function checkOrigin(request: Request) {
   const expected = configuredAppOrigin() || new URL(request.url).origin;
-  if (
-    !expected ||
-    request.headers.get("origin") !== expected ||
-    (production && !expected.startsWith("https://"))
-  )
-    throw new ApiError("Forbidden", 403);
+  const origin = request.headers.get("origin");
   const site = request.headers.get("sec-fetch-site");
-  if (site && site !== "same-origin" && site !== "none")
+
+  if (!expected || (production && !expected.startsWith("https://"))) {
     throw new ApiError("Forbidden", 403);
+  }
+
+  // Browsers may omit Origin on same-origin GET requests.
+  if (origin) {
+    if (origin !== expected) {
+      throw new ApiError("Forbidden", 403);
+    }
+  } else if (request.method !== "GET") {
+    throw new ApiError("Forbidden", 403);
+  }
+
+  if (site && site !== "same-origin" && site !== "none") {
+    throw new ApiError("Forbidden", 403);
+  }
 }
 export async function issueCsrf() {
   const jar = await cookies();

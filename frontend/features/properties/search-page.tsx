@@ -137,15 +137,7 @@ export function PropertySearchPage() {
     replaceSearch(next);
   };
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <DisplayHeading>
-          {ar ? "اكتشف بيتك القادم" : "Find your next home"}
-        </DisplayHeading>
-        <p className="text-sm leading-7 text-muted-foreground">
-          {t("searchDescription")}
-        </p>
-      </header>
+      <div className="flex flex-col gap-7">
       <div className="flex min-w-0 flex-col gap-3">
         {preferences.userId ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">

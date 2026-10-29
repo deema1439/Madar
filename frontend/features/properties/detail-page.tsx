@@ -86,7 +86,7 @@ function PropertyDetailContent({
     const title = p.title || "تفاصيل البيت";
 
     return (
-        <div className="flex min-w-0 flex-col gap-14 pb-12 lg:gap-20">
+        <div className="flex min-w-0 flex-col gap-8 pb-10 lg:gap-12">
             <QueryFeedback query={query} />
 
             {/* SECTION 1 — Property overview */}
@@ -133,7 +133,7 @@ function PropertyDetailContent({
             </section>
 
             {/* SECTION 2 — Comparison */}
-            <section className="border-t border-border/60 pt-10 lg:pt-12">
+            <section className="border-t border-border/60 pt-7 lg:pt-9">
                 <CompareWithSavedHome
                     source={source}
                     externalId={externalId}
@@ -141,7 +141,7 @@ function PropertyDetailContent({
             </section>
 
             {/* SECTION 3 — Location and neighborhood */}
-            <section className="border-t border-border/60 pt-10 lg:pt-12">
+            <section className="border-t border-border/60 pt-7 lg:pt-9">
                 <PropertyLocationExperience
                     key={`${source}:${externalId}`}
                     propertyReference={{ source, externalId }}
@@ -157,34 +157,46 @@ function PropertyDetailContent({
             </section>
 
             {/* SECTION 4 — Similar properties */}
-            <section className="border-t border-border/60 pt-10 lg:pt-12">
-                <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="space-y-3">
+
+            {/* SECTION 4 — Similar properties */}
+            <section className="border-t border-border/60 pt-8 lg:pt-10">
+                <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0 space-y-2">
                         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                            <HousePlus className="size-4" />
-                            {ar ? "اكتشف خيارات أكثر" : "Explore more homes"}
+                            <HousePlus className="size-4" aria-hidden="true" />
+                            <span>
+          {ar ? "اكتشف خيارات أكثر" : "Explore more homes"}
+        </span>
                         </div>
 
                         <h2 className="text-2xl font-semibold tracking-tight">
-                            {ar ? "بيوت قد تناسبك أيضًا" : "Homes you might also like"}
+                            {ar
+                                ? "بيوت قد تناسبك أيضًا"
+                                : "Homes you might also like"}
                         </h2>
 
-                        <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
-                            الخيارات المشابهة تظهر بعدد محدود، وتراعي السعر والغرف.
-                            وإذا توفرت إحداثيات البيت، نستخدمها لضبط النتائج.
-                            بنطاق 5 كم بخط مستقيم، وإلا تكون على مستوى المدينة.
+                        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                            {ar
+                                ? "اكتشف عقارات مشابهة لهذا البيت من حيث السعر والمساحة والموقع."
+                                : "Discover similar homes based on price, size, and location."}
                         </p>
                     </div>
 
                     <Button
+                        type="button"
                         variant="outline"
-                        className="shrink-0 rounded-xl"
+                        className="w-fit shrink-0 rounded-xl"
+                        aria-expanded={showSimilar}
                         onClick={() => setShowSimilar((v) => !v)}
                     >
-                        <ArrowLeftRight className="size-4" />
+                        <ArrowLeftRight className="size-4" aria-hidden="true" />
                         {showSimilar
-                            ? "إخفاء الخيارات المشابهة"
-                            : "عرض الخيارات المشابهة"}
+                            ? ar
+                                ? "إخفاء العقارات"
+                                : "Hide homes"
+                            : ar
+                                ? "استعراض العقارات"
+                                : "Browse homes"}
                     </Button>
                 </div>
 
@@ -210,13 +222,16 @@ function PropertyDetailContent({
                                 ))}
                             </div>
                         ) : (
-                            <p className="rounded-2xl border border-border/60 p-6 text-sm text-muted-foreground">
-                                لا توجد خيارات مشابهة لدى المزوّد.
+                            <p className="rounded-2xl border border-border/60 bg-card p-5 text-sm text-muted-foreground">
+                                {ar
+                                    ? "ما لقينا عقارات مشابهة متاحة حاليًا."
+                                    : "No similar homes are currently available."}
                             </p>
                         )}
                     </div>
                 ) : null}
             </section>
+
         </div>
     );
 }

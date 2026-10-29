@@ -61,10 +61,10 @@ export function MadarStorySection() {
   const titleLines = t("storyTitle").split("\n");
 
   return (
-    <section
-      id="story"
-      className="relative isolate scroll-mt-24 overflow-hidden bg-[#1C2D47] py-10 text-white sm:py-12 lg:py-14"
-    >
+      <section
+          id="story"
+          className="relative isolate scroll-mt-24 overflow-hidden bg-[#1C2D47] pb-10 pt-52 text-white sm:pb-12 sm:pt-56 lg:pb-14 lg:pt-60"
+      >
       {/* Ambient background effects */}
       <div
         aria-hidden="true"

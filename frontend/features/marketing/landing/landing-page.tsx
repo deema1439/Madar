@@ -9,16 +9,18 @@ import { FeaturesSection } from "./features-section";
 import { FinalCTASection } from "./final-cta-section";
 
 export function LandingPage() {
-  return (
-    <MarketingShell>
-      <MadarStorySection />
-      <PropertyDiscoveryHero />
-      <PropertyDiscoverySection />
-      <PersonalizedLocationsSection />
-      <PropertyComparisonSection />
-      <HowItWorksSection />
-      <FeaturesSection />
-      <FinalCTASection />
-    </MarketingShell>
-  );
+    return (
+        <MarketingShell
+            mainClassName="relative -mt-28 sm:-mt-32 lg:-mt-36"
+        >
+            <MadarStorySection />
+            <PropertyDiscoveryHero />
+            <PropertyDiscoverySection />
+            <PersonalizedLocationsSection />
+            <PropertyComparisonSection />
+            <HowItWorksSection />
+            <FeaturesSection />
+            <FinalCTASection />
+        </MarketingShell>
+    );
 }

@@ -95,12 +95,27 @@ export function usePreferenceSearch(serialized: string) {
   const cache = useQueryClient();
   const hydrated = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const explicit = hasExplicitSearch(new URLSearchParams(serialized));
+  const params = new URLSearchParams(serialized);
+  const guestWithPreferences =
+      hydrated &&
+      userId === null &&
+      params.get("searchState") === "preferences";
+  const needsInitialization = hydrated && !explicit && userId !== null;
   const [restoring, setRestoring] = useState(false);
   const [feedback, setFeedback] = useState<"failed" | "none" | null>(null);
   const restoreRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!hydrated || explicit) return;
+    if (!guestWithPreferences) return;
+
+    commit(
+        searchSnapshot(new URLSearchParams(serialized), {}, "manual"),
+        true,
+    );
+  }, [guestWithPreferences, serialized]);
+
+  useEffect(() => {
+    if (!hydrated || explicit || guestWithPreferences) return;
     const controller = new AbortController();
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(12_000)]);
     const current = () => !controller.signal.aborted && isCurrent(serialized, userId);
@@ -127,8 +142,7 @@ export function usePreferenceSearch(serialized: string) {
         commit(searchSnapshot(new URLSearchParams(serialized), {}, "manual"), true);
       });
     return () => controller.abort();
-  }, [hydrated, explicit, serialized, userId, cache]);
-
+  }, [hydrated, explicit, guestWithPreferences, serialized, userId, cache]);
   useEffect(
     () => () => {
       restoreRequest.current?.abort();
@@ -178,7 +192,7 @@ export function usePreferenceSearch(serialized: string) {
   };
   return {
     cancelRestore,
-    initializing: !explicit && (!hydrated || userId !== null),
+    initializing: !hydrated || needsInitialization,
     restoring,
     restore,
     userId,

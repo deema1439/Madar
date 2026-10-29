@@ -105,9 +105,9 @@ function MovingGuide({ language }: { language: Language }) {
     {
       number: "01",
       title: isArabic ? "حدّد منزلك" : "Choose your home",
-      description: isArabic
-          ? "أضف البيت اللي ناوي تنتقل له من صفحة منزلي وحيّي."
-          : "Add the home you plan to move into from My Home & Neighborhood.",
+        description: isArabic
+            ? "اختر البيت اللي ناوي تنتقل له من صفحة بيوتي المحفوظة."
+            : "Choose the home you plan to move into from your saved properties.",
       icon: Home,
     },
     {
@@ -205,7 +205,7 @@ function HomeAction({
     const DirectionIcon = isArabic ? ArrowLeft : ArrowRight;
 
     // ضعي هنا المسار الصحيح لصفحة منزلي وحيّي
-    const homeHref = `/${locale}/neighborhood`;
+    const homeHref = `/${locale}/saved`;
     return (
         <Button
             asChild
@@ -223,8 +223,9 @@ function HomeAction({
                   ? "انتقل إلى منزلي وحيّي"
                   : "Go to My Home"
               : isArabic
-                  ? "أضف منزلك"
-                  : "Add your home"}
+                  ? "اختر بيتك القادم"
+                  : "Choose your next home"
+          }
         </span>
 
                 <DirectionIcon
@@ -341,9 +342,9 @@ export function MovingChecklistPage() {
               </h2>
 
               <p className="mx-auto mt-3 max-w-xl text-sm leading-8 text-muted-foreground">
-                {isArabic
-                    ? "عشان يجهّز مدار خطة انتقال مناسبة لك، أضف منزلك أولًا من صفحة «منزلي وحيّي». بعدها ارجع هنا وأنشئ خطتك، وابدأ متابعة تجهيزاتك."
-                    : "To create a moving checklist, first add your home from My Home & Neighborhood. Then return here to generate your plan and track your preparations."}
+                  {isArabic
+                      ? "عشان يجهّز مدار خطة انتقال مناسبة لك، اختر بيتك القادم من «بيوتي المحفوظة». بعدها ارجع هنا وأنشئ خطتك وابدأ متابعة تجهيزاتك."
+                      : "To create your moving checklist, choose your next home from your saved properties. Then return here to generate your plan."}
               </p>
 
               <HomeAction
