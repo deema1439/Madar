@@ -204,36 +204,30 @@ function HomeAction({
     const isArabic = language === "ar";
     const DirectionIcon = isArabic ? ArrowLeft : ArrowRight;
 
-    // ضعي هنا المسار الصحيح لصفحة منزلي وحيّي
     const homeHref = `/${locale}/saved`;
+
     return (
-        <Button
-            asChild
-            className="mt-6 h-11 rounded-xl px-6"
+        <Link
+            href={homeHref}
+            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-            <Link
-                href={homeHref}
-                className="inline-flex flex-row items-center justify-center gap-2 whitespace-nowrap"
-            >
-                <Home className="size-4 shrink-0" aria-hidden="true" />
+            <Home className="size-4 shrink-0" aria-hidden="true" />
 
-                <span>
-          {movedIn
-              ? isArabic
-                  ? "انتقل إلى منزلي وحيّي"
-                  : "Go to My Home"
-              : isArabic
-                  ? "اختر بيتك القادم"
-                  : "Choose your next home"
-          }
-        </span>
+            <span>
+        {movedIn
+            ? isArabic
+                ? "انتقل إلى منزلي وحيّي"
+                : "Go to My Home"
+            : isArabic
+                ? "اختر بيتك القادم"
+                : "Choose your next home"}
+      </span>
 
-                <DirectionIcon
-                    className="size-4 shrink-0"
-                    aria-hidden="true"
-                />
-            </Link>
-        </Button>
+            <DirectionIcon
+                className="size-4 shrink-0"
+                aria-hidden="true"
+            />
+        </Link>
     );
 }
 
