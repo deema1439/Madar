@@ -534,22 +534,59 @@ public class RecommendationService {
         // Use the same scoring factors for every property
         final boolean useServices = servicesEvaluated;
 
-        List<PropertyMatchResponseDTO> ranked = selected.stream()
-                .map(property -> calculateScore(
-                        userId,
-                        property,
-                        preference,
-                        weights,
-                        false,
-                        useServices
-                                ? servicesScores.get(property.getExternalId())
-                                : null
-                ))
-                .sorted(Comparator.comparing(
-                        PropertyMatchResponseDTO::matchScore
-                ).reversed())
-                .limit(10)
-                .toList();
+
+        List<PropertyMatchResponseDTO> ranked;
+
+        try {
+            // Try Google Routes for all properties.
+            ranked = selected.stream()
+                    .map(property -> calculateScore(
+                            userId,
+                            property,
+                            preference,
+                            weights,
+                            false,
+                            useServices
+                                    ? servicesScores.get(property.getExternalId())
+                                    : null,
+                            false
+                    ))
+                    .sorted(Comparator.comparing(
+                            PropertyMatchResponseDTO::matchScore
+                    ).reversed())
+                    .limit(10)
+                    .toList();
+
+        } catch (ApiException e) {
+
+            if (e.getMessage() == null ||
+                    !e.getMessage().startsWith("Failed to calculate route:")) {
+                throw e;
+            }
+
+            log.warn(
+                    "Google Routes unavailable. Recalculating all recommendations using geographic proximity."
+            );
+
+            // Use the same geographic scoring method for every property.
+            ranked = selected.stream()
+                    .map(property -> calculateScore(
+                            userId,
+                            property,
+                            preference,
+                            weights,
+                            false,
+                            useServices
+                                    ? servicesScores.get(property.getExternalId())
+                                    : null,
+                            true
+                    ))
+                    .sorted(Comparator.comparing(
+                            PropertyMatchResponseDTO::matchScore
+                    ).reversed())
+                    .limit(10)
+                    .toList();
+        }
 
 
 
@@ -677,18 +714,21 @@ public class RecommendationService {
                             );
 
 
+                    // Individual Google Places verification disabled for demo
+                    // to reduce API requests and quota consumption.
+                    // The batch result is used for service scoring.
 
                     // Verify a missing type separately
-                    if (!found) {
-
-                        GooglePlacesResponseDTO individual = placePreferenceService.getNearbyServices(latitude, longitude, target.type(), target.radius());
-
-                        if (individual == null || individual.places() == null) {
-                            return null;
-                        }
-
-                        found = individual.places().stream().anyMatch(place -> matchesType(place, target.type()));
-                    }
+//                    if (!found) {
+//
+//                        GooglePlacesResponseDTO individual = placePreferenceService.getNearbyServices(latitude, longitude, target.type(), target.radius());
+//
+//                        if (individual == null || individual.places() == null) {
+//                            return null;
+//                        }
+//
+//                        found = individual.places().stream().anyMatch(place -> matchesType(place, target.type()));
+//                    }
 
                     if (found) {
                         available++;
@@ -767,8 +807,14 @@ public class RecommendationService {
     }
 
     // Calculate scores using existing property data
-    private PropertyMatchResponseDTO calculateScore(Integer userId, PropertyDTO property, HousingPreference preference, RecommendationWeightsDTO weights, boolean includePlaces, Double precomputedServicesScore) {
-
+    private PropertyMatchResponseDTO calculateScore(
+            Integer userId,
+            PropertyDTO property,
+            HousingPreference preference,
+            RecommendationWeightsDTO weights,
+            boolean includePlaces,
+            Double precomputedServicesScore,
+            boolean geographicFallback) {
 
         if (property == null || property.getLatitude() == null ||
                 property.getLongitude() == null || property.getPrice() == null || property.getPrice() <= 0) {
@@ -850,12 +896,35 @@ public class RecommendationService {
         }
 
         // Commute analysis is optional when the user has no important locations.
+        // Commute analysis with geographic fallback.
         Double commuteScore = null;
 
-        if (!placePreferenceRepository.findPlacePreferencesByUser_Id(userId).isEmpty()) {
-            CommuteSummaryResponseDTO commute = placePreferenceService.getCommuteAnalysis(userId, property.getLatitude(), property.getLongitude());
+        if (!placePreferenceRepository
+                .findPlacePreferencesByUser_Id(userId)
+                .isEmpty()) {
 
-            commuteScore = commute.commuteScore();
+            if (geographicFallback) {
+
+                // Google Routes failed: use geographic proximity instead.
+                commuteScore =
+                        placePreferenceService.calculateGeographicProximityScore(
+                                userId,
+                                property.getLatitude(),
+                                property.getLongitude()
+                        );
+
+            } else {
+
+                // Normal mode: use Google Routes.
+                CommuteSummaryResponseDTO commute =
+                        placePreferenceService.getCommuteAnalysis(
+                                userId,
+                                property.getLatitude(),
+                                property.getLongitude()
+                        );
+
+                commuteScore = commute.commuteScore();
+            }
         }
 
         // Use precomputed services when available
@@ -902,5 +971,23 @@ public class RecommendationService {
         return new PropertyMatchResponseDTO(property.getExternalId(), property.getSource(), property.getTitle(), matchScore, housingScore, commuteScore, servicesScore);
     }
 
+    private PropertyMatchResponseDTO calculateScore(
+            Integer userId,
+            PropertyDTO property,
+            HousingPreference preference,
+            RecommendationWeightsDTO weights,
+            boolean includePlaces,
+            Double precomputedServicesScore) {
+
+        return calculateScore(
+                userId,
+                property,
+                preference,
+                weights,
+                includePlaces,
+                precomputedServicesScore,
+                false
+        );
+    }
 
 }

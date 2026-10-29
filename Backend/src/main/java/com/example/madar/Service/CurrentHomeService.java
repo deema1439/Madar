@@ -121,6 +121,7 @@ public class CurrentHomeService {
 
 
     //delete current home
+    @Transactional
     public void deleteCurrentHome(Integer userId, Integer homeId) {
 
         User user = userRepository.findUserById(userId);
@@ -128,7 +129,9 @@ public class CurrentHomeService {
             throw new ApiException("User not found");
         }
 
-        CurrentHome currentHome = currentHomeRepository.findCurrentHomeById(homeId);
+        CurrentHome currentHome =
+                currentHomeRepository.findCurrentHomeById(homeId);
+
         if (currentHome == null) {
             throw new ApiException("Current home not found");
         }
@@ -137,9 +140,14 @@ public class CurrentHomeService {
             throw new ApiException("This home does not belong to the user");
         }
 
-        currentHomeRepository.delete(currentHome);
-    }
+        if (user.getCurrentHome() != null
+                && user.getCurrentHome().getId().equals(homeId)) {
+            user.setCurrentHome(null);
+        }
 
+        currentHomeRepository.delete(currentHome);
+        currentHomeRepository.flush();
+    }
     //extra endpoints
 
     // Confirm the user's single stored home without changing its other data.

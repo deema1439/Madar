@@ -426,6 +426,66 @@ public List<PlacePreference>getMyPlaces(Integer userId){
         return results;
     }
 
+    // Fallback score based on geographic proximity, without Google Routes.
+    public Double calculateGeographicProximityScore(
+            Integer userId,
+            Double propertyLat,
+            Double propertyLng) {
 
+        List<PlacePreference> places =
+                placePreferenceRepository.findPlacePreferencesByUser_Id(userId);
+
+        if (places.isEmpty()) {
+            return null;
+        }
+
+        double weightedSum = 0;
+        double totalWeight = 0;
+
+        for (PlacePreference place : places) {
+
+            if (place.getLatitude() == null
+                    || place.getLongitude() == null
+                    || place.getImportance() == null
+                    || place.getVisitPerWeek() == null) {
+                continue;
+            }
+
+            double weight =
+                    place.getImportance() * place.getVisitPerWeek();
+
+            if (weight <= 0) {
+                continue;
+            }
+
+            double distanceKm = propertyService.calculateDistanceKm(
+                    propertyLat,
+                    propertyLng,
+                    place.getLatitude(),
+                    place.getLongitude()
+            );
+
+            // Geographic proximity, not driving time.
+            // 2 km or less = 100, 20 km or more = 0.
+            double score = Math.max(
+                    0,
+                    Math.min(
+                            100,
+                            100 - (distanceKm - 2) * (100.0 / 18.0)
+                    )
+            );
+
+            weightedSum += score * weight;
+            totalWeight += weight;
+        }
+
+        if (totalWeight <= 0) {
+            return null;
+        }
+
+        return Math.round(
+                (weightedSum / totalWeight) * 100.0
+        ) / 100.0;
+    }
 
 }
